@@ -1,0 +1,94 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+
+# Anaconda
+conda-meta/
+*.conda
+*.tar.bz2
+
+# LLM OS specific
+llm_os_storage/
+conversation_history.json
+embeddings_cache.json
+
+# API Keys and Environment
+.env
+.env.local
+.env.*.local
+*.key
+secrets/
+
+# IDE and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+*.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+tmp/
+temp/
+
+# Documentation builds
+docs/_build/
+site/
+
+# Package files
+*.zip
+*.tar.gz
+*.rar
+
+# OpenAI specific
+.openai_cache/
+openai_logs/
