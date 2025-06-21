@@ -12,7 +12,7 @@ class BaseAgent:
     def __init__(self, name: str, role: str):
         self.name = name
         self.role = role
-        openai.api_key = config.OPENAI_API_KEY
+        self.client = openai.OpenAI(api_key=config.OPENAI_API_KEY)
     
     def think(self, prompt: str, context: str = "") -> str:
         """Use LLM to process request."""
@@ -26,7 +26,7 @@ class BaseAgent:
         messages.append({"role": "user", "content": prompt})
         
         try:
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model=config.MODEL_NAME,
                 messages=messages,
                 temperature=config.AGENT_TEMPERATURE,

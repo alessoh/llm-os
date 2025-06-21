@@ -6,16 +6,17 @@ import os
 from datetime import datetime
 import config
 
-openai.api_key = config.OPENAI_API_KEY
+# Initialize OpenAI client
+client = openai.OpenAI(api_key=config.OPENAI_API_KEY)
 
 def get_embedding(text: str) -> List[float]:
     """Get embedding for a text string."""
     try:
-        response = openai.Embedding.create(
+        response = client.embeddings.create(
             model=config.EMBEDDING_MODEL,
             input=text
         )
-        return response['data'][0]['embedding']
+        return response.data[0].embedding
     except Exception as e:
         print(f"Error getting embedding: {e}")
         return []

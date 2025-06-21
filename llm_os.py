@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 from typing import List, Dict, Any
 import json
+import openai
 
 import config
 import utils
@@ -27,13 +28,34 @@ class LLMOS:
             print(utils.format_error("OpenAI API key not found! Set OPENAI_API_KEY environment variable."))
             sys.exit(1)
         
+        # Test API connection
+        print(utils.format_system_message("Testing OpenAI API connection..."))
+        try:
+            test_client = openai.OpenAI(api_key=config.OPENAI_API_KEY)
+            # Simple test to verify API key works
+            models = test_client.models.list()
+            print(utils.format_system_message("API connection successful!"))
+        except openai.AuthenticationError:
+            print(utils.format_error("Invalid OpenAI API key! Please check your API key."))
+            sys.exit(1)
+        except openai.APIConnectionError:
+            print(utils.format_error("Failed to connect to OpenAI API. Check your internet connection."))
+            sys.exit(1)
+        except Exception as e:
+            print(utils.format_error(f"Unexpected error connecting to OpenAI API: {str(e)}"))
+            sys.exit(1)
+        
         # Initialize components
-        self.coordinator = AgentCoordinator()
-        self.conversation_history = []
-        self.context = {
-            'session_start': utils.timestamp(),
-            'user_profile': {}
-        }
+        try:
+            self.coordinator = AgentCoordinator()
+            self.conversation_history = []
+            self.context = {
+                'session_start': utils.timestamp(),
+                'user_profile': {}
+            }
+        except Exception as e:
+            print(utils.format_error(f"Failed to initialize components: {str(e)}"))
+            sys.exit(1)
         
         print(utils.format_system_message("LLM OS initialized successfully!"))
         print(utils.format_system_message("Type 'help' for available commands or just chat naturally."))
@@ -71,34 +93,42 @@ class LLMOS:
     
     def process_command(self, command: str):
         """Process a user command."""
-        # Add to history
-        self.conversation_history.append({
-            'role': 'user',
-            'content': command,
-            'timestamp': utils.timestamp()
-        })
-        
-        # Build context
-        context = self._build_context()
-        
-        # Route to appropriate agent
-        agent_name, response = self.coordinator.route_command(command, context)
-        
-        # Display response
-        print(utils.format_agent_response(agent_name, response))
-        print()
-        
-        # Add to history
-        self.conversation_history.append({
-            'role': 'assistant',
-            'agent': agent_name,
-            'content': response,
-            'timestamp': utils.timestamp()
-        })
-        
-        # Trim history if too long
-        if len(self.conversation_history) > config.MAX_CONVERSATION_HISTORY * 2:
-            self.conversation_history = self.conversation_history[-config.MAX_CONVERSATION_HISTORY:]
+        try:
+            # Add to history
+            self.conversation_history.append({
+                'role': 'user',
+                'content': command,
+                'timestamp': utils.timestamp()
+            })
+            
+            # Build context
+            context = self._build_context()
+            
+            # Route to appropriate agent
+            agent_name, response = self.coordinator.route_command(command, context)
+            
+            # Display response
+            print(utils.format_agent_response(agent_name, response))
+            print()
+            
+            # Add to history
+            self.conversation_history.append({
+                'role': 'assistant',
+                'agent': agent_name,
+                'content': response,
+                'timestamp': utils.timestamp()
+            })
+            
+            # Trim history if too long
+            if len(self.conversation_history) > config.MAX_CONVERSATION_HISTORY * 2:
+                self.conversation_history = self.conversation_history[-config.MAX_CONVERSATION_HISTORY:]
+                
+        except openai.RateLimitError:
+            print(utils.format_error("Rate limit reached. Please wait a moment and try again."))
+        except openai.APIError as e:
+            print(utils.format_error(f"OpenAI API error: {str(e)}"))
+        except Exception as e:
+            print(utils.format_error(f"Error processing command: {str(e)}"))
     
     def _build_context(self) -> str:
         """Build context from conversation history."""
@@ -170,12 +200,16 @@ You can also just chat naturally - the system will understand and route your req
         """Shutdown the OS."""
         print(utils.format_system_message("Shutting down LLM OS..."))
         
-        # Save conversation history
-        history_file = os.path.join(config.STORAGE_PATH, "conversation_history.json")
-        utils.save_json({
-            'history': self.conversation_history,
-            'context': self.context
-        }, history_file)
+        try:
+            # Save conversation history
+            history_file = os.path.join(config.STORAGE_PATH, "conversation_history.json")
+            utils.save_json({
+                'history': self.conversation_history,
+                'context': self.context
+            }, history_file)
+            print(utils.format_system_message("Conversation history saved."))
+        except Exception as e:
+            print(utils.format_error(f"Failed to save history: {str(e)}"))
         
         print(utils.format_system_message("Goodbye!"))
 
