@@ -2,7 +2,7 @@
 LLM Operating System
 # LLM OS - AI-Native Operating System 
 
-## 🌟 Features
+## 🌟 Features story
 
 - **Natural Language Interface**: Communicate with your computer using everyday language
 - **Semantic File System**: Files are stored and retrieved based on meaning, not just names
